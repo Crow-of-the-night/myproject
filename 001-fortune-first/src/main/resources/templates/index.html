@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Roulette</title>
+    <link rel="icon" href="/img/dice.gif" type="image/x-icon"/>
+    <link type="text/css" rel="stylesheet" href="pure-release-1.0.0/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+    <script type="text/javascript" src="js/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="gsap-public/minified/gsap.min.js"></script>
+    <script type="text/javascript" src="js/jQueryRotate.2.2.js"></script>
+    <script type="text/javascript" src="js/jquery.easing.1.3.js"></script>
+    <script type="text/javascript">
+        $.easing.myeaseOut = function (x, t, b, c, d) {
+            return c * Math.sqrt(1 - (t=t/d-1)*t) + b;
+        };
+        var grade = 0;
+        function judge() {
+            if($("#participants").val()===""){
+                alert("请输入参与人")
+            } else {
+                if(grade<2)grade++;//根据需要修改if限制
+                setTimeout(function () {
+                    if (grade===1) {
+                        $("#show").attr("value","");
+                        $.ajax({
+                            type:"post",
+                            url:"/luck_dog",
+                            data:{
+                                participants:$("#participants").val()
+                            },
+                            dataType:"json",
+                            success:function(resp){
+                                $("#ImagePic").rotate({
+                                    angle:0,
+                                    animateTo: 360 + 180/resp.arraylength + 360/resp.arraylength*(resp.num),
+                                    easing : $.easing.myeaseOut(),
+                                });
+                                setTimeout(function () {
+                                    $("#show").attr("value",resp.name);
+                                },1000)
+                                // alert(resp.num + resp.name + resp.arraylength)
+                            }
+                        })
+                    };
+                    if (grade===2) {
+                        $("#show").attr("value","");
+                        $.ajax({
+                            type:"post",
+                            url:"/chosen_one",
+                            data:{
+                                participants:$("#participants").val()
+                            },
+                            dataType:"json",
+                            success:function(resp){
+                                $("#ImagePic").rotate({
+                                    angle:0,
+                                    animateTo: 360 + 180/resp.arraylength + 360/resp.arraylength*(resp.num),
+                                    easing : $.easing.myeaseOut(),
+                                });
+                                setTimeout(function () {
+                                    $("#show").attr("value",resp.name);
+                                },1000)
+                            }
+                        })
+                    };
+                    grade=0;
+                },200)
+            }
+        }
+        $(function () {
+            $("#btn").click(function () {
+                if($("#participants").val()===""){
+                    alert("请输入参与人")
+                } else {
+                    $.ajax({
+                        type: "post",
+                        url: "/turntable",
+                        data: {
+                            participants: $("#participants").val()
+                        },
+                        dataType: "json",
+                        success: function (resp) {
+                            $("#ImagePic").attr("src", "data:image/png;base64," + resp);
+                        }
+                    })
+                }
+            });
+        })
+    </script>
+    <style type="text/css">
+        .mybutton{
+            height: 35px;
+            padding: 0 1em;
+            background-color: #1aab8a;
+            border: none;
+            outline: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-repeat:no-repeat;background-color: #e5e5e5;">
+<div class="my_header" style="height: 60px;border-bottom: 1px solid #dddddd;">
+    <div class="header_text1" style="float: left;font-size: 24px;font-weight: bold;line-height: 60px;margin-left: 30px">
+        Roulette
+    </div>
+    <div class="header_text2" style="float: right;font-size: 18px;line-height: 60px;margin-right: 30px">
+        More
+    </div>
+    <div>
+        <img src="img/poker-1.gif" style="height: 20px;float: right;margin: 20px 10px">
+    </div>
+
+</div>
+<div style="margin-top: 3vh;height:641px;width:1267px;background: url(../img/background.gif) no-repeat;background-position: 173px 11px;">
+<textarea class="textarea" id="participants" placeholder="输入参与人" style="position: absolute;margin: 110px 0px 0px 270px;width: 480px;height: 280px"></textarea>
+<div style="position: absolute;margin: 466px 0px 0px 370px">
+<input id="btn" class="mybutton" type="button" value="新建轮盘" style="background-color: #decdc3"/>
+</div>
+<div style="position: absolute;margin: 500px 0px 0px 987px">
+<input id="btn2" class="mybutton" type="button" value="抽取一人" onclick="judge()" style="background-color: #decdc3"/>
+</div>
+<div style="position: absolute;margin: 550px 0px 0px 983px">
+    <input type="text" id="show" style="width: 100px">
+</div>
+<div style="position: absolute;margin: 61px 0px 0px 837px">
+    <img id="ImagePic" src=""/>
+</div>
+</div>
+</body>
+</html>
